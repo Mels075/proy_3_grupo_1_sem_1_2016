@@ -1,0 +1,93 @@
+
+
+
+NET "sw1[7]" IOSTANDARD = LVCMOS33;
+NET "sw1[6]" IOSTANDARD = LVCMOS33;
+NET "sw1[5]" IOSTANDARD = LVCMOS33;
+NET "sw1[4]" IOSTANDARD = LVCMOS33;
+NET "sw1[3]" IOSTANDARD = LVCMOS33;
+NET "sw1[2]" IOSTANDARD = LVCMOS33;
+NET "sw1[1]" IOSTANDARD = LVCMOS33;
+NET "sw1[0]" IOSTANDARD = LVCMOS33;
+NET "sw2[7]" IOSTANDARD = LVCMOS33;
+NET "sw2[6]" IOSTANDARD = LVCMOS33;
+NET "sw2[5]" IOSTANDARD = LVCMOS33;
+NET "sw2[4]" IOSTANDARD = LVCMOS33;
+NET "sw2[3]" IOSTANDARD = LVCMOS33;
+NET "sw2[2]" IOSTANDARD = LVCMOS33;
+NET "sw2[1]" IOSTANDARD = LVCMOS33;
+NET "sw2[0]" IOSTANDARD = LVCMOS33;
+
+
+NET "sw2[7]" LOC = p4;
+NET "sw2[6]" LOC = P3;
+NET "sw2[5]" LOC = R3;
+NET "sw2[4]" LOC = T1;
+NET "sw2[3]" LOC = T3;
+NET "sw2[2]" LOC = U2;
+NET "sw2[1]" LOC = V2;
+NET "sw2[0]" LOC = U4;
+NET "sw1[7]" LOC = V5;
+NET "sw1[6]" LOC = V6;
+NET "sw1[5]" LOC = V7;
+NET "sw1[4]" LOC = R5;
+NET "sw1[3]" LOC = R6;
+NET "sw1[2]" LOC = R7;
+NET "sw1[1]" LOC = U8;
+NET "sw1[0]" LOC = U9;
+
+
+NET "CLK" IOSTANDARD = LVCMOS33;
+
+
+
+NET "CLK" LOC = E3;
+
+
+# PlanAhead Generated IO constraints 
+
+NET "segcode1[7]" IOSTANDARD = LVCMOS33;
+NET "segcode1[6]" IOSTANDARD = LVCMOS33;
+NET "segcode1[5]" IOSTANDARD = LVCMOS33;
+NET "segcode1[4]" IOSTANDARD = LVCMOS33;
+NET "segcode1[3]" IOSTANDARD = LVCMOS33;
+NET "segcode1[2]" IOSTANDARD = LVCMOS33;
+NET "segcode1[1]" IOSTANDARD = LVCMOS33;
+NET "segcode1[0]" IOSTANDARD = LVCMOS33;
+NET "digit2[3]" IOSTANDARD = LVCMOS33;
+NET "digit2[2]" IOSTANDARD = LVCMOS33;
+NET "digit2[1]" IOSTANDARD = LVCMOS33;
+NET "digit2[0]" IOSTANDARD = LVCMOS33;
+NET "digit1[3]" IOSTANDARD = LVCMOS33;
+NET "digit1[2]" IOSTANDARD = LVCMOS33;
+NET "digit1[1]" IOSTANDARD = LVCMOS33;
+NET "digit1[0]" IOSTANDARD = LVCMOS33;
+
+# PlanAhead Generated physical constraints 
+
+NET "digit1[3]" LOC = N5;
+NET "digit1[2]" LOC = M3;
+NET "digit1[1]" LOC = M6;
+NET "digit1[0]" LOC = N6;
+NET "digit2[3]" LOC = M1;
+NET "digit2[2]" LOC = L1;
+NET "digit2[1]" LOC = N4;
+NET "digit2[0]" LOC = N2;
+NET "segcode1[7]" LOC = M4;
+NET "segcode1[6]" LOC = L3;
+NET "segcode1[5]" LOC = N1;
+NET "segcode1[4]" LOC = L5;
+NET "segcode1[3]" LOC = L4;
+NET "segcode1[2]" LOC = K3;
+NET "segcode1[1]" LOC = M2;
+NET "segcode1[0]" LOC = L6;
+
+# PlanAhead Generated IO constraints 
+
+NET "rst" IOSTANDARD = LVCMOS33;
+
+
+# PlanAhead Generated physical constraints 
+
+NET "rst" LOC = E16;
+
