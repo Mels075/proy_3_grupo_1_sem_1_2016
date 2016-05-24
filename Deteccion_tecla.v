@@ -3,7 +3,7 @@
 // Company: 
 // Engineer: 
 // 
-// Create Date:    13:41:13 05/16/2016 
+// Create Date:    13:41:13 05/14/2016 
 // Design Name: 
 // Module Name:    Deteccion_tecla 
 // Project Name: 

@@ -3,7 +3,7 @@
 // Company: 
 // Engineer: 
 // 
-// Create Date:    19:18:55 05/16/2016 
+// Create Date:    19:18:55 05/14/2016 
 // Design Name: 
 // Module Name:    Lector_teclado 
 // Project Name: 

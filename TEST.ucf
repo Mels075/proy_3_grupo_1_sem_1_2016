@@ -1,0 +1,36 @@
+
+# PlanAhead Generated IO constraints 
+
+NET "interruptor[2]" IOSTANDARD = LVCMOS33;
+NET "interruptor[1]" IOSTANDARD = LVCMOS33;
+NET "interruptor[0]" IOSTANDARD = LVCMOS33;
+NET "color_out[7]" IOSTANDARD = LVCMOS33;
+NET "color_out[6]" IOSTANDARD = LVCMOS33;
+NET "color_out[5]" IOSTANDARD = LVCMOS33;
+NET "color_out[4]" IOSTANDARD = LVCMOS33;
+NET "color_out[3]" IOSTANDARD = LVCMOS33;
+NET "color_out[2]" IOSTANDARD = LVCMOS33;
+NET "color_out[1]" IOSTANDARD = LVCMOS33;
+NET "color_out[0]" IOSTANDARD = LVCMOS33;
+NET "BEGINNING" IOSTANDARD = LVCMOS33;
+NET "hsincroni" IOSTANDARD = LVCMOS33;
+NET "OROLOGIO" IOSTANDARD = LVCMOS33;
+NET "vsincroni" IOSTANDARD = LVCMOS33;
+
+# PlanAhead Generated physical constraints 
+
+NET "color_out[0]" LOC = R7;
+NET "color_out[1]" LOC = T7;
+NET "color_out[2]" LOC = P8;
+NET "color_out[3]" LOC = T6;
+NET "color_out[4]" LOC = V6;
+NET "color_out[5]" LOC = U7;
+NET "color_out[6]" LOC = V7;
+NET "color_out[7]" LOC = N7;
+NET "hsincroni" LOC = N6;
+NET "vsincroni" LOC = P7;
+NET "OROLOGIO" LOC = V10;
+NET "BEGINNING" LOC = T5;
+NET "interruptor[2]" LOC = T10;
+NET "interruptor[1]" LOC = T9;
+NET "interruptor[0]" LOC = V9;
