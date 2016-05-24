@@ -1,0 +1,34 @@
+;ini_rtc.psm
+;
+; esta rutina va a inicializar el RTC
+;
+
+CONSTANT dir, 00 ; estas tres hay que mapearlas segun la memoria de perifericos
+CONSTANT funcion, 01
+CONSTANT dataW, 02
+inirtc: 
+	LOAD s1,02 ; se carga la función del RTC de lectura
+	LOAD s0,02 ; se carga la dirección del bit de inicialización
+	LOAD s3, 04
+	CALL escritura
+	LOAD s3, 00	
+	CALL escritura
+	LOAD s3, d2 ; se carga el dato del digital trimming
+	LOAD s0,10
+	CALL escritura
+	LOAD s3, 00 ; se baja el bit de frecuency tunning
+	LOAD s0,00
+	CALL escritura
+	RETURN
+
+escritura:
+	OUTPUT s0, dir
+	OUTPUT s3, dataW
+	OUTPUT s1, funcion
+	CALL listo
+	RETURN
+	
+listo:INPUT s2, 02
+	COMPARE s2,00
+	JUMP Z, listo
+	RETURN

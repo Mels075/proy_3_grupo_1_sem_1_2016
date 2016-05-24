@@ -1,0 +1,44 @@
+;write_VGA.psm
+;
+; esta rutina va a escribir los datos en el VGA
+;
+
+CONSTANT year_v, 03 
+CONSTANT mes_v, 04
+CONSTANT dia_v, 05
+CONSTANT hora_v, 06
+CONSTANT min_v, 07
+CONSTANT seg_v, 08
+CONSTANT horac_v, 09
+CONSTANT minc_v, 0a
+CONSTANT segc_v, 0b
+CONSTANT forcrono, 0c
+CONSTANT ampmfor, 0d
+
+writeVGA: 
+	FETCH s0,00 
+	OUTPUT s0,year_v
+	FETCH s0,01 
+	OUTPUT s0,mes_v
+	FETCH s0,02 
+	OUTPUT s0,dia_v
+	FETCH s0,03
+	OUTPUT s0,hora_v
+	FETCH s0,04 
+	OUTPUT s0,min_v
+	FETCH s0,05 
+	OUTPUT s0,seg_v
+	FETCH s0,06 
+	OUTPUT s0,horac_v
+	FETCH s0,07 
+	OUTPUT s0,minc_v
+	FETCH s0,08 
+	OUTPUT s0,segc_v
+	FETCH s0,09 
+	OUTPUT s0,forcrono
+	FETCH s0,0a 
+	OUTPUT s0,ampmfor
+	RETURN
+
+ 
+	

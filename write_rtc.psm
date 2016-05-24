@@ -1,0 +1,68 @@
+;write_rtc.psm
+;
+; esta rutina va a leer los datos del RTC
+;
+; direcciones de memoria
+CONSTANT year, 26
+CONSTANT month, 25
+CONSTANT day, 24
+CONSTANT hour, 23
+CONSTANT min, 22
+CONSTANT seg, 21
+CONSTANT hourcr, 43
+CONSTANT mincr, 42
+CONSTANT segcr, 41
+CONSTANT func, f0
+CONSTANT forcrono,00
+
+CONSTANT dir, 00 ; estas tres hay que mapearlas segun la memoria de perifericos
+CONSTANT funcion, 01
+CONSTANT dataW, 02
+writertc: 
+	LOAD s1,02 ; se carga la función del RTC de lectura
+	LOAD s0,year
+	FETCH s3, 00
+	CALL escritura
+	FETCH s3, 01
+	LOAD s0,month
+	CALL escritura
+	FETCH s3, 02
+	LOAD s0,day
+	CALL escritura
+	FETCH s3, 03
+	LOAD s0,hour
+	CALL escritura
+	FETCH s3, 04
+	LOAD s0,min
+	CALL escritura
+	FETCH s3, 05
+	LOAD s0,seg
+	CALL escritura
+	FETCH s3, 06
+	LOAD s0,hourcr
+	CALL escritura
+	FETCH s3, 07
+	LOAD s0,mincr
+	CALL escritura
+	FETCH s3, 08
+	LOAD s0,segcr
+	CALL escritura
+	FETCH s3, 09
+	LOAD s0,forcrono
+	CALL escritura
+	LOAD s3, ff
+	LOAD s0,func ; se carga la dirección de comando de transferencia
+	CALL escritura
+	RETURN
+
+escritura:
+	OUTPUT s0, dir
+	OUTPUT s3, dataW
+	OUTPUT s1, funcion
+	CALL listo
+	RETURN
+	
+listo:INPUT s2, 02
+	COMPARE s2,00
+	JUMP Z, listo
+	RETURN

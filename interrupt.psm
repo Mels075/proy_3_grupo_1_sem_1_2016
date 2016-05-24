@@ -1,0 +1,43 @@
+;interrupt.psm
+;
+; esta es la rutina de interrupción
+;
+
+
+CONSTANT tecla, 03 ; estas tres hay que mapearlas segun la memoria de perifericos
+
+ADDRESS 3ff
+ISR: REGBANK B
+	CALL read_teclado
+	RETURNI ENABLE
+
+read_teclado: 
+	INPUT s0, tecla
+	COMPARE s0, 76	;escape
+	JUMP Z, funcion
+	COMPARE s0, 05 ;f1 hora
+	JUMP Z, funcion
+	COMPARE s0, 06;f2 fecha
+	JUMP Z, funcion
+	COMPARE s0, 04;	f3 crono
+	JUMP Z, funcion
+	COMPARE s0, 0c ; formato
+	JUMP Z, forcrono
+	COMPARE s0, 03 ; inicrono
+	JUMP Z, forcrono
+	COMPARE s0, 74 ;derecha
+	JUMP Z, flecha
+	COMPARE s0, 6b ;izquierda
+	JUMP Z, flecha
+	STORE s0, 0e ; en caso de no ser tecla de función o flecha, guarda la tecla como un numero
+	
+fin_teclado:RETURN
+
+funcion: STORE s0, 0b
+	JUMP fin_teclado
+forcrono:STORE s0, 0c
+	JUMP fin_teclado
+flecha: STORE s0, 0d
+	JUMP fin_teclado
+
+	

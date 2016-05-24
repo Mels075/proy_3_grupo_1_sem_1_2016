@@ -1,0 +1,213 @@
+;ROM_inst.psm
+;
+; progra general
+;
+
+;constantes
+CONSTANT year, 26
+CONSTANT month, 25
+CONSTANT day, 24
+CONSTANT hour, 23
+CONSTANT min, 22
+CONSTANT seg, 21
+CONSTANT hourcr, 43
+CONSTANT mincr, 42
+CONSTANT segcr, 41
+CONSTANT func, f0
+CONSTANT forcrono,00
+
+CONSTANT dir, 00 ; estas tres hay que mapearlas segun la memoria de perifericos
+CONSTANT funcion, 01
+CONSTANT dataW, 02
+
+CONSTANT year_v, 03 
+CONSTANT mes_v, 04
+CONSTANT dia_v, 05
+CONSTANT hora_v, 06
+CONSTANT min_v, 07
+CONSTANT seg_v, 08
+CONSTANT horac_v, 09
+CONSTANT minc_v, 0a
+CONSTANT segc_v, 0b
+CONSTANT ampmfor, 0c
+
+CONSTANT tecla, 03
+
+start: ENABLE INTERRUPT
+	CALL inirtc
+start2:	CALL readrtc
+	CALL writeVGA
+	CALL writertc
+	jump start2
+
+inirtc: 
+	LOAD s1,02 ; se carga la función del RTC de lectura
+	LOAD s0,02 ; se carga la dirección del bit de inicialización
+	LOAD s3, 04
+	CALL escritura
+	LOAD s3, 00	
+	CALL escritura
+	LOAD s3, d2 ; se carga el dato del digital trimming
+	LOAD s0,10
+	CALL escritura
+	LOAD s3, 00 ; se baja el bit de frecuency tunning
+	LOAD s0,00
+	CALL escritura
+	RETURN
+
+readrtc: 
+	LOAD s0,func ; se carga la dirección de comando de transferencia
+	LOAD s1,01 ; se carga la función del RTC de lectura
+	CALL lectura
+	LOAD s0,year
+	CALL lectura
+	STORE s3, 00
+	LOAD s0,month
+	CALL lectura
+	STORE s3, 01
+	LOAD s0,day
+	CALL lectura
+	STORE s3, 02
+	LOAD s0,hour
+	CALL lectura
+	STORE s3, 03
+	LOAD s0,min
+	CALL lectura
+	STORE s3, 04
+	LOAD s0,seg
+	CALL lectura
+	STORE s3, 05
+	LOAD s0,hourcr
+	CALL lectura
+	STORE s3, 06
+	LOAD s0,mincr
+	CALL lectura
+	STORE s3, 07
+	LOAD s0,segcr
+	CALL lectura
+	STORE s3, 08
+	LOAD s0,forcrono
+	CALL lectura
+	STORE s3, 09
+	INPUT s3, 02
+	STORE s3, 0a
+	RETURN
+
+writertc: 
+	LOAD s1,02 ; se carga la función del RTC de lectura
+	LOAD s0,year
+	FETCH s3, 00
+	CALL escritura
+	FETCH s3, 01
+	LOAD s0,month
+	CALL escritura
+	FETCH s3, 02
+	LOAD s0,day
+	CALL escritura
+	FETCH s3, 03
+	LOAD s0,hour
+	CALL escritura
+	FETCH s3, 04
+	LOAD s0,min
+	CALL escritura
+	FETCH s3, 05
+	LOAD s0,seg
+	CALL escritura
+	FETCH s3, 06
+	LOAD s0,hourcr
+	CALL escritura
+	FETCH s3, 07
+	LOAD s0,mincr
+	CALL escritura
+	FETCH s3, 08
+	LOAD s0,segcr
+	CALL escritura
+	FETCH s3, 09
+	LOAD s0,forcrono
+	CALL escritura
+	LOAD s3, ff
+	LOAD s0,func ; se carga la dirección de comando de transferencia
+	CALL escritura
+	RETURN
+
+writeVGA: 
+	FETCH s0,00 
+	OUTPUT s0,year_v
+	FETCH s0,01 
+	OUTPUT s0,mes_v
+	FETCH s0,02 
+	OUTPUT s0,dia_v
+	FETCH s0,03
+	OUTPUT s0,hora_v
+	FETCH s0,04 
+	OUTPUT s0,min_v
+	FETCH s0,05 
+	OUTPUT s0,seg_v
+	FETCH s0,06 
+	OUTPUT s0,horac_v
+	FETCH s0,07 
+	OUTPUT s0,minc_v
+	FETCH s0,08 
+	OUTPUT s0,segc_v
+	FETCH s0,0a 
+	OUTPUT s0,ampmfor
+	RETURN
+
+lectura:
+	DISABLE INTERRUPT
+	OUTPUT s0, dir
+	OUTPUT s1, funcion
+	CALL listo
+	INPUT s3, 00
+	ENABLE INTERRUPT
+	RETURN
+
+escritura:
+	DISABLE INTERRUPT
+	OUTPUT s0, dir
+	OUTPUT s3, dataW
+	OUTPUT s1, funcion
+	CALL listo
+	ENABLE INTERRUPT
+	RETURN
+	
+listo:INPUT s2, 02
+	COMPARE s2,00
+	JUMP Z, listo
+	RETURN
+
+ADDRESS 3ff
+ISR: REGBANK B
+	CALL read_teclado
+	RETURNI ENABLE
+
+read_teclado: 
+	INPUT s0, tecla
+	COMPARE s0, 76	;escape
+	JUMP Z, teclafuncion
+	COMPARE s0, 05 ;f1 hora
+	JUMP Z, teclafuncion
+	COMPARE s0, 06;f2 fecha
+	JUMP Z, teclafuncion
+	COMPARE s0, 04;	f3 crono
+	JUMP Z, teclafuncion
+	COMPARE s0, 0c ; formato
+	JUMP Z, forcronometro
+	COMPARE s0, 03 ; inicrono
+	JUMP Z, forcronometro
+	COMPARE s0, 74 ;derecha
+	JUMP Z, flecha
+	COMPARE s0, 6b ;izquierda
+	JUMP Z, flecha
+	STORE s0, 0e ; en caso de no ser tecla de función o flecha, guarda la tecla como un numero
+	
+fin_teclado:RETURN
+
+teclafuncion: STORE s0, 0b
+	JUMP fin_teclado
+forcronometro:STORE s0, 0c
+	JUMP fin_teclado
+flecha: STORE s0, 0d
+	JUMP fin_teclado
+
+
