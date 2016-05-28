@@ -23,8 +23,8 @@
 	 input [9:0] PIX_X, PIX_Y,
 	 input [7:0] HORA, MIN, SEG, DIA, MES, YEAR, HCRONO, MCRONO, SCRONO, HCRONO_RUN, MCRONO_RUN, SCRONO_RUN,
 	 input FIN_CRONO, AM_PM, HFORMATO,
-	 input [2:0] DIR_P_CRONO, DIR_P_FECHA, DIR_P_HORA,			//indica la posición del cursor en la programación
-	 input [1:0] PROGRAMANDO_LUGAR,					//indica que cosa el usuario desea programar o si no desea programar nada
+	 input [2:0] DIR_CURSOR,			//indica la posición del cursor en la programación
+	 input [7:0] PROGRAMANDO_LUGAR,					//indica que cosa el usuario desea programar o si no desea programar nada
 	 output reg [7:0] COLOUR
 	 );
 	 // Se define el tamaño de cada imagen y la posición en la que van a estar
@@ -260,8 +260,8 @@
 	 always @*
 	 begin
 		case (PIX_X[6:4])
-			3'h0: caracter_crono_set = {3'b011,HCRONO[7:4]};
-			3'h1: caracter_crono_set = {3'b011,HCRONO[3:0]};
+			3'h0: caracter_crono_set = {3'b011,HCRONO[7:4]};		//decenas
+			3'h1: caracter_crono_set = {3'b011,HCRONO[3:0]};		//unidades
 			3'h2: caracter_crono_set = 7'h3a;
 			3'h3: caracter_crono_set = {3'b011,MCRONO[7:4]};
 			3'h4: caracter_crono_set = {3'b011,MCRONO[3:0]};
@@ -309,18 +309,18 @@
 		COLOUR_ROM = 8'h49;					//COLOR DE FONDO
 		if (hora)
 			begin CARACTER = caracter_hora; DIR_FILA = df_hora; DIR_BIT=db_hora;
-				if (PROGRAMANDO_LUGAR==1)
+				if (PROGRAMANDO_LUGAR==8'h05)														//Se esta programando hora
 				begin
 					if (~clk_PARPADEO)
 					begin
-						if ((DIR_P_HORA==0 && PIX_X[7:4]==4'h5) || (DIR_P_HORA==1 && PIX_X[7:4]==4'h6) ||
-							 (DIR_P_HORA==2 && PIX_X[7:4]==4'h8) || (DIR_P_HORA==3 && PIX_X[7:4]==4'h9) ||
-							 (DIR_P_HORA==4 && PIX_X[7:4]==4'hb) || (DIR_P_HORA==5 && PIX_X[7:4]==4'hc)) COLOUR_ROM = 8'h49;
+						if ((DIR_CURSOR==0 && PIX_X[7:4]==4'h5) || (DIR_CURSOR==1 && PIX_X[7:4]==4'h6) ||
+							 (DIR_CURSOR==2 && PIX_X[7:4]==4'h8) || (DIR_CURSOR==3 && PIX_X[7:4]==4'h9) ||
+							 (DIR_CURSOR==4 && PIX_X[7:4]==4'hb) || (DIR_CURSOR==5 && PIX_X[7:4]==4'hc)) COLOUR_ROM = 8'h49;
 						else if (fuente_bit) COLOUR_ROM = 8'h14;
 					end
 					else if (clk_PARPADEO && fuente_bit) COLOUR_ROM = 8'h14;
 				end
-				else if (fuente_bit && PROGRAMANDO_LUGAR!=1) COLOUR_ROM = 8'h14;
+				else if (fuente_bit && PROGRAMANDO_LUGAR!=8'h05) COLOUR_ROM = 8'h14;
 			end
 			
 		else if (formato_hora)
@@ -330,18 +330,18 @@
 			
 		else if (fecha)
 			begin CARACTER = caracter_fecha; DIR_FILA = df_fecha; DIR_BIT=db_fecha;
-				if (PROGRAMANDO_LUGAR==2)
+				if (PROGRAMANDO_LUGAR==8'h06)														//se esta programando fecha
 				begin
 					if (~clk_PARPADEO)
 					begin
-						if ((DIR_P_FECHA==0 && PIX_X[7:4]==4'hb) || (DIR_P_FECHA==1 && PIX_X[7:4]==4'hc) ||
-							 (DIR_P_FECHA==2 && PIX_X[7:4]==4'he) || (DIR_P_FECHA==3 && PIX_X[7:4]==4'hf) ||
-							 (DIR_P_FECHA==4 && PIX_X[7:4]==4'h1) || (DIR_P_FECHA==5 && PIX_X[7:4]==4'h2)) COLOUR_ROM = 8'h49;
+						if ((DIR_CURSOR==0 && PIX_X[7:4]==4'hb) || (DIR_CURSOR==1 && PIX_X[7:4]==4'hc) ||
+							 (DIR_CURSOR==2 && PIX_X[7:4]==4'he) || (DIR_CURSOR==3 && PIX_X[7:4]==4'hf) ||
+							 (DIR_CURSOR==4 && PIX_X[7:4]==4'h1) || (DIR_CURSOR==5 && PIX_X[7:4]==4'h2)) COLOUR_ROM = 8'h49;
 						else if (fuente_bit) COLOUR_ROM = 8'h14;
 					end
 					else if (clk_PARPADEO && fuente_bit) COLOUR_ROM = 8'h14;
 				end
-				else if (fuente_bit && PROGRAMANDO_LUGAR!=2) COLOUR_ROM = 8'h14;
+				else if (fuente_bit && PROGRAMANDO_LUGAR!=8'h06) COLOUR_ROM = 8'h14;
 			end
 			
 		else if (formato_fecha)
@@ -351,18 +351,18 @@
 			
 		else if (crono_set)
 			begin CARACTER = caracter_crono_set; DIR_FILA = df_crono_set; DIR_BIT=db_crono_set;
-				if (PROGRAMANDO_LUGAR==3)
+				if (PROGRAMANDO_LUGAR==8'h04)														// se esta programando cronometro
 				begin
 					if (~clk_PARPADEO)
 					begin
-						if ((DIR_P_CRONO==0 && PIX_X[6:4]==3'h0) || (DIR_P_CRONO==1 && PIX_X[6:4]==3'h1) ||
-							 (DIR_P_CRONO==2 && PIX_X[6:4]==3'h3) || (DIR_P_CRONO==3 && PIX_X[6:4]==3'h4) ||
-							 (DIR_P_CRONO==4 && PIX_X[6:4]==3'h6) || (DIR_P_CRONO==5 && PIX_X[6:4]==3'h7)) COLOUR_ROM = 8'h49;
+						if ((DIR_CURSOR==0 && PIX_X[6:4]==3'h0) || (DIR_CURSOR==1 && PIX_X[6:4]==3'h1) ||
+							 (DIR_CURSOR==2 && PIX_X[6:4]==3'h3) || (DIR_CURSOR==3 && PIX_X[6:4]==3'h4) ||
+							 (DIR_CURSOR==4 && PIX_X[6:4]==3'h6) || (DIR_CURSOR==5 && PIX_X[6:4]==3'h7)) COLOUR_ROM = 8'h49;
 						else if (fuente_bit) COLOUR_ROM = 8'h14;
 					end
 					else if (clk_PARPADEO && fuente_bit) COLOUR_ROM = 8'h14;
 				end
-				else if (fuente_bit && PROGRAMANDO_LUGAR!=3) COLOUR_ROM = 8'h14;
+				else if (fuente_bit && PROGRAMANDO_LUGAR!=8'h04) COLOUR_ROM = 8'h14;
 			end
 			
 		else if (crono_run)

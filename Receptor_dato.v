@@ -22,7 +22,7 @@ module Receptor_dato(
     input wire clk_nexys, reset,
 	 input wire ps2d, ps2c,
 	 output reg rx_done_tick,
-	 output [7:0] dato 
+	 output [7:0] dato
 	 );
 	 
 	 localparam [1:0] idle = 2'b00, 
@@ -68,7 +68,7 @@ module Receptor_dato(
 		estado_sig = estado_reg;
 		rx_done_tick = 1'b0;
 		n_sig = n_reg;
-		b_sig = b_reg;
+		b_sig [10:0]= b_reg[10:0];
 		case (estado_reg)
 			idle: if (fall_edge)
 					begin

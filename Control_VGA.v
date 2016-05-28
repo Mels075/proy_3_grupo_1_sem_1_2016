@@ -19,17 +19,9 @@
 //
 //////////////////////////////////////////////////////////////////////////////////
 module Control_VGA(
-	input reloj_nexys, reset_total, //handshake,
-	input [1:0] direccion_prog,
-	input [2:0] prog_crono_dir, prog_fecha_dir, prog_hora_dir,
-	input finale, tempo, formatto,
-	//input [7:0] h_oro_act, m_oro_act, s_oro_act, 
-	//input [7:0] giorno_act, messe_act, agno_act, ora_act, minute_act, secondo_act,
-	//input [7:0] h_run_act, m_run_act, s_run_act,
-	input wire [7:0] h_oro, m_oro, s_oro,
-	input wire [7:0] giorno, messe, agno,
-	input wire [7:0] ora, minute, secondo,
-	input wire [7:0] H_run, M_run, S_run,
+	input reloj_nexys, reset_total, 
+	input [7:0] dato, id_port,
+	input write_strobe,
 	output [7:0] color_salida,
 	output hsincro, vsincro
     );
@@ -45,18 +37,73 @@ module Control_VGA(
 	 reg [7:0] rgb_reg;
 	 wire medio_seg;
 	 
-	  
-	/* HandShake inst_handshake(
-	 .h_oro_a(h_oro_act), .m_oro_a(m_oro_act), .s_oro_a(s_oro_act), 
-	 .giorno_a(giorno_act), .messe_a(messe_act), .agno_a(agno_act), 
-	 .ora_a(ora_act), .minute_a(minute_act), .secondo_a(secondo_act),
-	 .h_run_a(h_run_act), .m_run_a(m_run_act), .s_run_a(s_run_act),
-	 .HS_flag(handshake), .reset(reset_interno), .reloj_nex(reloj_interno),
-	 .h_oro_o(h_oro), .m_oro_o(m_oro), .s_oro_o(s_oro), 
-	 .giorno_o(giorno), .messe_o(messe), .agno_o(agno),
-	 .ora_o(ora), .minute_o(minute), .secondo_o(secondo), 
-	 .h_run_o(H_run), .m_run_o(M_run), .s_run_o(S_run)
-    );*/
+	 
+	 // datos provisionales
+	 reg [7:0] handshake;
+	 reg finale_p, tempo_p, formatto_p;			//finalcronometro, ampm, formato de hora 12 ó 24 h
+	 reg [7:0] h_oro_p, m_oro_p, s_oro_p;
+	 reg [7:0] giorno_p, messe_p, agno_p;
+	 reg [7:0] ora_p, minute_p, secondo_p;		//cronometro
+	 reg [7:0] H_run_p, M_run_p, S_run_p;	 
+	 reg [7:0] direccion_prog_p;											//lo que esta programando, se recibe el codigo de la tecla
+	 reg [2:0] dir_cursor_p;  //posicion del cursor
+	 
+	 always @(posedge reloj_interno, posedge reset_interno)
+	 begin
+		if (reset_interno)
+		begin
+			handshake <= 8'h00;
+			finale_p <= 1'b0; tempo_p <= 1'b0; formatto_p <= 1'b0;
+			h_oro_p <= 8'h00; m_oro_p <= 8'h00; s_oro_p <= 8'h00;
+			giorno_p <= 8'h00; messe_p <= 8'h00; agno_p <= 8'h00;
+			ora_p <= 8'h00; minute_p <= 8'h00; secondo_p <= 8'h00;   //cronometro
+			H_run_p <= 8'h00; M_run_p <= 8'h00; S_run_p <= 8'h00;
+			direccion_prog_p <= 8'h00;
+			dir_cursor_p <= 3'h0;
+		end
+		else if (write_strobe)
+			case(id_port)
+				8'h04: agno_p[7:4] <= dato[3:0];
+				8'h05: agno_p[3:0] <= dato[3:0];
+				8'h06: messe_p[7:4] <= dato[3:0];
+				8'h07: messe_p[3:0] <= dato[3:0];
+				8'h08: giorno_p[7:4] <= dato[3:0];
+				8'h09: giorno_p[3:0] <= dato[3:0];
+				8'h0a: h_oro_p[7:4] <= dato[3:0];
+				8'h0b: h_oro_p[3:0] <= dato[3:0];
+				8'h0c: m_oro_p[7:4] <= dato[3:0];
+				8'h0d: m_oro_p[3:0] <= dato[3:0];
+				8'h0e: s_oro_p[7:4] <= dato[3:0];
+				8'h0f: s_oro_p[3:0] <= dato[3:0];
+				8'h10: H_run_p[7:4] <= dato[3:0];
+				8'h11: H_run_p[3:0] <= dato[3:0];
+				8'h12: M_run_p[7:4] <= dato[3:0];
+				8'h13: M_run_p[3:0] <= dato[3:0];
+				8'h14: S_run_p[7:4] <= dato[3:0];
+				8'h15: S_run_p[3:0] <= dato[3:0];
+				8'h16: begin tempo_p <= dato[4]; formatto_p <= dato[0]; end
+				8'h17: dir_cursor_p <= dato[2:0];
+				8'h18: direccion_prog_p <= dato;
+				8'h19: handshake <= dato;
+			endcase
+	 end
+	 
+	 HandShake inst_handshake(
+    .clock(clock), .reset(reset), 
+    .HANDSHAKE(HANDSHAKE), 
+    .finale_P(finale_p), .tempo_P(tempo_p), .formatto_P(formatto_p), 
+    .h_oro_P(h_oro_p), .m_oro_P(m_oro_p), .s_oro_P(s_oro_p), 
+    .giorno_P(giorno_p), .messe_P(messe_p), .agno_P(agno_p), 
+    .ora_P(ora_p), .minute_P(minute_p), .secondo_P(secondo_p), 
+    .H_run_P(H_run_p), .M_run_P(M_run_p), .S_run_P(S_run_p), 
+    .direccion_prog_P(direccion_prog_p), .dir_cursor_P(dir_cursor_p), 
+    .finale(finale), .tempo(tempo), .formatto(formatto), 
+    .h_oro(h_oro), .m_oro(m_oro), .s_oro(s_oro), 
+	 .giorno(giorno), .messe(messe), .agno(agno), 
+	 .ora(ora), .minute(minute), .secondo(secondo), 
+    .H_run(H_run), .M_run(M_run), .S_run(S_run), 
+    .direccion_prog(direccion_prog), .dir_cursor(dir_cursor)
+    );
 	 
 	  Contador inst_25MHz(
     .CLK_NX(reloj_interno),
@@ -85,7 +132,7 @@ module Control_VGA(
 	 .HCRONO(ora), .MCRONO(minute), .SCRONO(secondo), 
 	 .HCRONO_RUN(H_run), .MCRONO_RUN(M_run), .SCRONO_RUN(S_run),
 	 .FIN_CRONO(finale), .AM_PM(tempo), .HFORMATO(formatto),
-	 .DIR_P_CRONO(prog_crono_dir), .DIR_P_FECHA(prog_fecha_dir), .DIR_P_HORA(prog_hora_dir),			//indica la posición del cursor en la programación
+	 .DIR_CURSOR(dir_cursor), 		//indica la posición del cursor en la programación
 	 .PROGRAMANDO_LUGAR(direccion_prog),					//indica que cosa el usuario desea programar o si no desea programar nada
 	 .COLOUR(colour)
 	 );
