@@ -80,7 +80,7 @@ module Receptor_dato(
 					begin
 						b_sig = {ps2d, b_reg[10:1]};
 						if (n_reg==0) estado_sig=load;
-						else n_sig = n_reg - 4'd1;
+						else n_sig = n_reg - 4'b0001;
 					end
 			load: begin
 						estado_sig = idle;

@@ -19,10 +19,11 @@
 //
 //////////////////////////////////////////////////////////////////////////////////
 	module VGA_b(
-    input clk_PARPADEO, CLK_NEXYS, clk_VGA,
+    input clk_PARPADEO, CLK_NEXYS, clk_VGA, RESET,
 	 input [9:0] PIX_X, PIX_Y,
 	 input [7:0] HORA, MIN, SEG, DIA, MES, YEAR, HCRONO, MCRONO, SCRONO, HCRONO_RUN, MCRONO_RUN, SCRONO_RUN,
-	 input FIN_CRONO, AM_PM, HFORMATO,
+	 input FIN_CRONO, 
+	 input AM_PM, HFORMATO,
 	 input [2:0] DIR_CURSOR,			//indica la posición del cursor en la programación
 	 input [7:0] PROGRAMANDO_LUGAR,					//indica que cosa el usuario desea programar o si no desea programar nada
 	 output reg [7:0] COLOUR
@@ -46,17 +47,29 @@
 	 localparam X_fecha = 9'd434;
 	 localparam Y_fecha = 6'd50;
 	 
-	 localparam imagenescT = 12'd2880;
-	 localparam imagenescX = 7'd80;
-	 localparam imagenescY = 6'd36;
-	 localparam X_esc = 10'd524;
-	 localparam Y_esc = 9'd360;
+	 localparam imagenesctitT = 11'd1265;
+	 localparam imagenesctitX = 6'd55;
+	 localparam imagenesctitY = 5'd23;
+	 localparam X_esctit = 10'd504;
+	 localparam Y_esctit = 9'd345;
 	 
-	 localparam imagendespT = 12'd3960;
-	 localparam imagendespX = 7'd90;
-	 localparam imagendespY = 6'd44;
-	 localparam X_desp = 9'd405;
-	 localparam Y_desp = 9'd406;
+	 localparam imagenescteclaT = 11'd1258;
+	 localparam imagenescteclaX = 6'd37;
+	 localparam imagenescteclaY = 6'd34;
+	 localparam X_esctecla = 10'd569;
+	 localparam Y_esctecla = 9'd340;
+	 
+	 localparam imagendesptitT = 12'd3000;
+	 localparam imagendesptitX = 7'd120;
+	 localparam imagendesptitY = 5'd25;
+	 localparam X_desptit = 9'd495;
+	 localparam Y_desptit = 9'd380;
+	 
+	 localparam imagendespteclaT = 11'd1764;
+	 localparam imagendespteclaX = 6'd63;
+	 localparam imagendespteclaY = 5'd28;
+	 localparam X_desptecla = 10'd522;
+	 localparam Y_desptecla = 9'd410;
 	 
 	 localparam imagenT_teclasfuncT = 13'd6885;
 	 localparam imagenT_teclasfuncX = 8'd255;
@@ -74,16 +87,20 @@
 	 wire [11:0] STATE_HORA;
 	 wire [13:0] STATE_CRONO;
 	 wire [11:0] STATE_FECHA;
-	 wire [11:0] STATE_ESC;
-	 wire [11:0] STATE_DESP;
+	 wire [11:0] STATE_ESCTIT;
+	 wire [11:0] STATE_ESCTECLA;
+	 wire [11:0] STATE_DESPTIT;
+	 wire [11:0] STATE_DESPTECLA;
 	 wire [12:0] STATE_T_TECLASFUNC;
 	 wire [14:0] STATE_TX_TECLASFUNC;
 	 
 	 reg [7:0] COLOUR_HORA [0:imagenhoraT-1];
 	 reg [7:0] COLOUR_CRONO [0:imagencronoT-1];
 	 reg [7:0] COLOUR_FECHA [0:imagenfechaT-1];
-	 reg [7:0] COLOUR_ESC [0:imagenescT-1];
-	 reg [7:0] COLOUR_DESP [0:imagendespT-1];
+	 reg [7:0] COLOUR_ESCTIT [0:imagenesctitT-1];
+	 reg [7:0] COLOUR_ESCTECLA [0:imagenescteclaT-1];
+	 reg [7:0] COLOUR_DESPTIT [0:imagendesptitT-1];
+	 reg [7:0] COLOUR_DESPTECLA [0:imagendespteclaT-1];
 	 reg [7:0] COLOUR_T_TECLASFUNC [0:imagenT_teclasfuncT-1];
 	 reg [7:0] COLOUR_TX_TECLASFUNC [0:imagenTX_teclasfuncT-1];
 	 
@@ -112,6 +129,14 @@
 	 reg [6:0] caracter_hora, caracter_formato_hora;
 	 reg [6:0] caracter_fecha, caracter_formato_fecha;
 	 reg [6:0] caracter_crono_set, caracter_crono_run, caracter_ring;
+	 //Para el parpadeo
+	 reg [23:0] contador;
+	 reg estado;
+	 reg estado_sig;
+	 reg clk_parp, bandera;
+	 reg [5:0] totalcont;
+	 
+	 localparam cuenta = 24'd16666666;
 	 
 	 // INSTANCIA DE LA ROM PARA LAS LETRAS Y CREACIÓN DE LAS VARIABLES NECESARIAS
 	 ROM_masres instancia_ROM_fuente(
@@ -126,8 +151,10 @@
 	 $readmemh ("hora.list", COLOUR_HORA);				//Lee el archivo de la imagen
 	 $readmemh ("crono.list", COLOUR_CRONO);
 	 $readmemh ("fecha.list", COLOUR_FECHA);
-	 $readmemh ("esc.list", COLOUR_ESC);
-	 $readmemh ("desp.list", COLOUR_DESP);
+	 $readmemh ("esctit.list", COLOUR_ESCTIT);
+	 $readmemh ("esctecla.list", COLOUR_ESCTECLA);
+	 $readmemh ("desptit.list", COLOUR_DESPTIT);
+	 $readmemh ("desptecla.list", COLOUR_DESPTECLA);
 	 $readmemh ("T_teclasfunc.list", COLOUR_T_TECLASFUNC);
 	 $readmemh ("TX_teclasfunc.list", COLOUR_TX_TECLASFUNC);
 	 end
@@ -136,12 +163,45 @@
 	 assign STATE_HORA = ((PIX_X-X_hora)*imagenhoraY)+PIX_Y-Y_hora;
 	 assign STATE_CRONO = (PIX_X-X_crono)*imagencronoY+PIX_Y-Y_crono;
 	 assign STATE_FECHA = (PIX_X-X_fecha)*imagenfechaY+PIX_Y-Y_fecha;
-	 assign STATE_ESC = (PIX_X-X_esc)*imagenescY+PIX_Y-Y_esc;
-	 assign STATE_DESP = (PIX_X-X_desp)*imagendespY+PIX_Y-Y_desp;
+	 assign STATE_ESCTIT = (PIX_X-X_esctit)*imagenesctitY+PIX_Y-Y_esctit;
+	 assign STATE_ESCTECLA = (PIX_X-X_esctecla)*imagenescteclaY+PIX_Y-Y_esctecla;
+	 assign STATE_DESPTIT = (PIX_X-X_desptit)*imagendesptitY+PIX_Y-Y_desptit;
+	 assign STATE_DESPTECLA = (PIX_X-X_desptecla)*imagendespteclaY+PIX_Y-Y_desptecla;
 	 assign STATE_T_TECLASFUNC = (PIX_X-X_T_teclasfunc)*imagenT_teclasfuncY+PIX_Y-Y_T_teclasfunc;
 	 assign STATE_TX_TECLASFUNC = (PIX_X-X_TX_teclasfunc)*imagenTX_teclasfuncY+PIX_Y-Y_TX_teclasfunc;
 	 
-	 
+//*************************** PARA EL PARPADEO********************************************************************************* 
+	 always @(posedge CLK_NEXYS, posedge RESET)
+	 begin
+		if (RESET)
+		begin
+			contador <= 24'd0;
+			totalcont <= 6'd0;
+			clk_parp <= 0;
+			estado<=0;
+			estado_sig<=1;
+			bandera <= 0;
+		end
+		else
+		begin
+			if (FIN_CRONO) estado<=1; 
+			else estado_sig<=0;
+			if (estado)
+			begin
+				bandera <=1;
+				if (contador>=cuenta) begin 
+				contador <= 24'd0; 
+				clk_parp <= ~clk_parp; 
+				totalcont <= totalcont + 6'd1;end
+				else contador <= contador + 24'd1;
+				if (totalcont >= 6'd50) begin totalcont <=6'd0; estado <=0; bandera <= 0; end
+			end
+			
+			else begin clk_parp <= estado_sig; bandera <= 0; end
+		end
+	end 
+	
+	
 //**********************************************************************************************************************
 	 always@(posedge clk_VGA)		//SELECCIONA EL COLOR QUE VA A LA SALIDA DEL MODULO Y POR TANTO EL COLOR DE LA PANTALLA
 	 begin
@@ -151,10 +211,14 @@
 				COLOUR <= COLOUR_CRONO[{STATE_CRONO}];
 		else if (PIX_X>=X_fecha && PIX_X<X_fecha+imagenfechaX && PIX_Y>=Y_fecha && PIX_Y<Y_fecha+imagenfechaY)
 				COLOUR <= COLOUR_FECHA[{STATE_FECHA}];
-	   else if (PIX_X>=X_esc && PIX_X<X_esc+imagenescX && PIX_Y>=Y_esc && PIX_Y<Y_esc+imagenescY)
-				COLOUR <= COLOUR_ESC[{STATE_ESC}];
-	   else if (PIX_X>=X_desp && PIX_X<X_desp+imagendespX && PIX_Y>=Y_desp && PIX_Y<Y_desp+imagendespY)
-				COLOUR <= COLOUR_DESP[{STATE_DESP}];
+	   else if (PIX_X>=X_esctit && PIX_X<X_esctit+imagenesctitX && PIX_Y>=Y_esctit && PIX_Y<Y_esctit+imagenesctitY)
+				COLOUR <= COLOUR_ESCTIT[{STATE_ESCTIT}];
+		else if (PIX_X>=X_esctecla && PIX_X<X_esctecla+imagenescteclaX && PIX_Y>=Y_esctecla && PIX_Y<Y_esctecla+imagenescteclaY)
+				COLOUR <= COLOUR_ESCTECLA[{STATE_ESCTECLA}];
+	   else if (PIX_X>=X_desptit && PIX_X<X_desptit+imagendesptitX && PIX_Y>=Y_desptit && PIX_Y<Y_desptit+imagendesptitY)
+				COLOUR <= COLOUR_DESPTIT[{STATE_DESPTIT}];
+	   else if (PIX_X>=X_desptecla && PIX_X<X_desptecla+imagendespteclaX && PIX_Y>=Y_desptecla && PIX_Y<Y_desptecla+imagendespteclaY)
+				COLOUR <= COLOUR_DESPTECLA[{STATE_DESPTECLA}];
 		else if (PIX_X>=X_T_teclasfunc && PIX_X<X_T_teclasfunc+imagenT_teclasfuncX && PIX_Y>=Y_T_teclasfunc && PIX_Y<Y_T_teclasfunc+imagenT_teclasfuncY)
 				COLOUR <= COLOUR_T_TECLASFUNC[{STATE_T_TECLASFUNC}];
 		else if (PIX_X>=X_TX_teclasfunc && PIX_X<X_TX_teclasfunc+imagenTX_teclasfuncX && PIX_Y>=Y_TX_teclasfunc && PIX_Y<Y_TX_teclasfunc+imagenTX_teclasfuncY)
@@ -293,9 +357,10 @@
 	 assign df_ring = PIX_Y[4:0] + 5'b01010;
 	 always @*
 	 begin
-		case (FIN_CRONO)
-			1'b0: begin RING_A = 7'h00; RING_B = 7'h00; end
-			1'b1: begin RING_A = 7'h3b; RING_B = 7'h3c; end
+		case (bandera)
+			1'd0: begin RING_A = 7'h00; RING_B = 7'h00; end
+			1'd1: begin RING_A = 7'h3b; RING_B = 7'h3c; end
+			default begin RING_A = 7'h00; RING_B = 7'h00; end
 		endcase
 		case (PIX_X[4])
 			1'b0: caracter_ring = RING_B;
@@ -303,7 +368,7 @@
 		endcase
 	 end
 	 
-	//************************************************************************************
+	//***********************************************************************************************************************************
 	 always@*
 	 begin
 		COLOUR_ROM = 8'h49;					//COLOR DE FONDO
@@ -313,19 +378,19 @@
 				begin
 					if (~clk_PARPADEO)
 					begin
-						if ((DIR_CURSOR==0 && PIX_X[7:4]==4'h5) || (DIR_CURSOR==1 && PIX_X[7:4]==4'h6) ||
-							 (DIR_CURSOR==2 && PIX_X[7:4]==4'h8) || (DIR_CURSOR==3 && PIX_X[7:4]==4'h9) ||
-							 (DIR_CURSOR==4 && PIX_X[7:4]==4'hb) || (DIR_CURSOR==5 && PIX_X[7:4]==4'hc)) COLOUR_ROM = 8'h49;
-						else if (fuente_bit) COLOUR_ROM = 8'h14;
+						if ((DIR_CURSOR==1 && PIX_X[7:4]==4'h5) || (DIR_CURSOR==2 && PIX_X[7:4]==4'h6) ||
+							 (DIR_CURSOR==3 && PIX_X[7:4]==4'h8) || (DIR_CURSOR==4 && PIX_X[7:4]==4'h9) ||
+							 (DIR_CURSOR==5 && PIX_X[7:4]==4'hb) || (DIR_CURSOR==6 && PIX_X[7:4]==4'hc)) COLOUR_ROM = 8'h49;
+						else if (fuente_bit) COLOUR_ROM = 8'h55;
 					end
-					else if (clk_PARPADEO && fuente_bit) COLOUR_ROM = 8'h14;
+					else if (clk_PARPADEO && fuente_bit) COLOUR_ROM = 8'h55;
 				end
-				else if (fuente_bit && PROGRAMANDO_LUGAR!=8'h05) COLOUR_ROM = 8'h14;
+				else if (fuente_bit && PROGRAMANDO_LUGAR!=8'h05) COLOUR_ROM = 8'h55;
 			end
 			
 		else if (formato_hora)
 			begin CARACTER = caracter_formato_hora; DIR_FILA = df_formato_hora; DIR_BIT=db_formato_hora;
-				if (fuente_bit) COLOUR_ROM = 8'h14;
+				if (fuente_bit) COLOUR_ROM = 8'h55;
 			end
 			
 		else if (fecha)
@@ -334,19 +399,19 @@
 				begin
 					if (~clk_PARPADEO)
 					begin
-						if ((DIR_CURSOR==0 && PIX_X[7:4]==4'hb) || (DIR_CURSOR==1 && PIX_X[7:4]==4'hc) ||
-							 (DIR_CURSOR==2 && PIX_X[7:4]==4'he) || (DIR_CURSOR==3 && PIX_X[7:4]==4'hf) ||
-							 (DIR_CURSOR==4 && PIX_X[7:4]==4'h1) || (DIR_CURSOR==5 && PIX_X[7:4]==4'h2)) COLOUR_ROM = 8'h49;
-						else if (fuente_bit) COLOUR_ROM = 8'h14;
+						if ((DIR_CURSOR==1 && PIX_X[7:4]==4'hb) || (DIR_CURSOR==2 && PIX_X[7:4]==4'hc) ||
+							 (DIR_CURSOR==3 && PIX_X[7:4]==4'he) || (DIR_CURSOR==4 && PIX_X[7:4]==4'hf) ||
+							 (DIR_CURSOR==5 && PIX_X[7:4]==4'h1) || (DIR_CURSOR==6 && PIX_X[7:4]==4'h2)) COLOUR_ROM = 8'h49;
+						else if (fuente_bit) COLOUR_ROM = 8'h55;
 					end
-					else if (clk_PARPADEO && fuente_bit) COLOUR_ROM = 8'h14;
+					else if (clk_PARPADEO && fuente_bit) COLOUR_ROM = 8'h55;
 				end
-				else if (fuente_bit && PROGRAMANDO_LUGAR!=8'h06) COLOUR_ROM = 8'h14;
+				else if (fuente_bit && PROGRAMANDO_LUGAR!=8'h06) COLOUR_ROM = 8'h55;
 			end
 			
 		else if (formato_fecha)
 			begin CARACTER = caracter_formato_fecha; DIR_FILA = df_formato_fecha; DIR_BIT=db_formato_fecha;
-				if (fuente_bit) COLOUR_ROM = 8'h14;
+				if (fuente_bit) COLOUR_ROM = 8'h55;
 			end
 			
 		else if (crono_set)
@@ -355,32 +420,30 @@
 				begin
 					if (~clk_PARPADEO)
 					begin
-						if ((DIR_CURSOR==0 && PIX_X[6:4]==3'h0) || (DIR_CURSOR==1 && PIX_X[6:4]==3'h1) ||
-							 (DIR_CURSOR==2 && PIX_X[6:4]==3'h3) || (DIR_CURSOR==3 && PIX_X[6:4]==3'h4) ||
-							 (DIR_CURSOR==4 && PIX_X[6:4]==3'h6) || (DIR_CURSOR==5 && PIX_X[6:4]==3'h7)) COLOUR_ROM = 8'h49;
-						else if (fuente_bit) COLOUR_ROM = 8'h14;
+						if ((DIR_CURSOR==1 && PIX_X[6:4]==3'h0) || (DIR_CURSOR==2 && PIX_X[6:4]==3'h1) ||
+							 (DIR_CURSOR==3 && PIX_X[6:4]==3'h3) || (DIR_CURSOR==4 && PIX_X[6:4]==3'h4) ||
+							 (DIR_CURSOR==5 && PIX_X[6:4]==3'h6) || (DIR_CURSOR==6 && PIX_X[6:4]==3'h7)) COLOUR_ROM = 8'h49;
+						else if (fuente_bit) COLOUR_ROM = 8'h55;
 					end
-					else if (clk_PARPADEO && fuente_bit) COLOUR_ROM = 8'h14;
+					else if (clk_PARPADEO && fuente_bit) COLOUR_ROM = 8'h55;
 				end
-				else if (fuente_bit && PROGRAMANDO_LUGAR!=8'h04) COLOUR_ROM = 8'h14;
+				else if (fuente_bit && PROGRAMANDO_LUGAR!=8'h04) COLOUR_ROM = 8'h55;
 			end
 			
 		else if (crono_run)
 			begin CARACTER = caracter_crono_run; DIR_FILA = df_crono_run; DIR_BIT=db_crono_run;
-				if (fuente_bit) COLOUR_ROM = 8'h14;
+				if (fuente_bit) COLOUR_ROM = 8'h55;
 			end
 			
-		else if (ring)
+		else if (ring)																									//RING
 			begin CARACTER = caracter_ring; DIR_FILA = df_ring; DIR_BIT=db_ring;
-				if (~clk_PARPADEO) COLOUR_ROM = 8'h49;
+				if (~clk_parp) COLOUR_ROM = 8'h49;
 				else if (fuente_bit) COLOUR_ROM = 8'he0;
 			end
 		else 
 			begin CARACTER = 7'h00; DIR_FILA = 5'h00; DIR_BIT=4'h0;
 			end
 	 end
-
-	 
 	 
 	 assign DIR_MEMO={CARACTER,DIR_FILA};
 	 assign fuente_bit=PALABRA[~DIR_BIT];

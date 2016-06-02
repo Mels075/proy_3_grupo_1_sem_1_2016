@@ -3,9 +3,9 @@
 // Company: 
 // Engineer: 
 // 
-// Create Date:    19:18:55 05/14/2016 
+// Create Date:    09:51:10 05/30/2016 
 // Design Name: 
-// Module Name:    Lector_teclado 
+// Module Name:    PruebaTeclado 
 // Project Name: 
 // Target Devices: 
 // Tool versions: 
@@ -18,11 +18,9 @@
 // Additional Comments: 
 //
 //////////////////////////////////////////////////////////////////////////////////
-module Lector_teclado(
-    input CLK, RST, PS2D, PS2C,
-	 input interrupcion_paro,
-	 output [7:0] TECLA,
-	 output interrupcion
+module PruebaTeclado(
+	 input Ps2C, Ps2D, CLK_NEX, reset,
+	 output reg [3:0] LEDS
 	 );
 	 
 	 wire tick;
@@ -30,27 +28,35 @@ module Lector_teclado(
 	 wire [7:0] TECLA_SUELTA;
 	 
 	 Deteccion_tecla inst_detector(
-    .clk_Nexys(CLK), .Reset(RST),
-	 .byte_dato(DATA),	 
-	 //.interrupcion_pb(interrupcion_paro),
+    .clk_Nexys(CLK_NEX), .Reset(reset),
+	 .byte_dato(DATA),		 
 	 .scan_done_tick(tick),
 	 .tecla(TECLA_SUELTA)
 	 );
 	 
 	 Receptor_dato inst_receptor(
-    .clk_nexys(CLK), .reset(RST),
-	 .ps2d(PS2D), .ps2c(PS2C),
+    .clk_nexys(CLK_NEX), .reset(reset),
+	 .ps2d(Ps2D), .ps2c(Ps2C),
 	 .rx_done_tick(tick),
 	 .dato(DATA)
 	 );
 	 
-	 Decodificador_tecla inst_control_teclas(
-    .reset(RST), .CLK_Nexys(CLK),
-	 .TECLA_IN(TECLA_SUELTA),
-	 .interrupt_paro(interrupcion_paro),
-	 .TECLA_OUT(TECLA),
-	 .interrupt(interrupcion)
-	 );
-
-
+	 
+	 always @(posedge CLK_NEX)
+	 begin
+		case (TECLA_SUELTA)
+			8'h16: LEDS <= 4'h1;
+			8'h1e: LEDS <= 4'h2;
+			8'h26: LEDS <= 4'h3;
+			8'h25: LEDS <= 4'h4;
+			8'h2e: LEDS <= 4'h5;
+			8'h36: LEDS <= 4'h6;
+			8'h3d: LEDS <= 4'h7;
+			8'h3e: LEDS <= 4'h8;
+			8'h46: LEDS <= 4'h9;
+			8'h45: LEDS <= 4'h0;
+			default: LEDS <= 4'ha;
+		endcase
+	 end
+	 
 endmodule

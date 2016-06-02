@@ -23,7 +23,7 @@ module Control_VGA(
 	input [7:0] dato, id_port,
 	input write_strobe,
 	output [7:0] color_salida,
-	output hsincro, vsincro
+	output hsincro, vsincro, audio
     );
 	 
 	 wire reloj_interno, reset_interno;
@@ -37,10 +37,21 @@ module Control_VGA(
 	 reg [7:0] rgb_reg;
 	 wire medio_seg;
 	 
+	 reg tempo, formatto;
+	 reg finale;
+	 reg [7:0] h_oro, m_oro, s_oro;
+	 reg [7:0] giorno, messe, agno;
+	 reg [7:0] ora, minute, secondo;		
+	 reg [7:0] H_run, M_run, S_run;	 
+	 reg [7:0] direccion_prog;			
+	 reg [2:0] dir_cursor;
 	 
-	 // datos provisionales
+	 //wire THE_FLAG;
+	 reg flag, flag_ant, flag_sig;
+	 
+	 // datos provisionales 
 	 reg [7:0] handshake;
-	 reg finale_p, tempo_p, formatto_p;			//finalcronometro, ampm, formato de hora 12 ó 24 h
+	 reg tempo_p, formatto_p;			//finalcronometro, ampm, formato de hora 12 ó 24 h
 	 reg [7:0] h_oro_p, m_oro_p, s_oro_p;
 	 reg [7:0] giorno_p, messe_p, agno_p;
 	 reg [7:0] ora_p, minute_p, secondo_p;		//cronometro
@@ -53,7 +64,8 @@ module Control_VGA(
 		if (reset_interno)
 		begin
 			handshake <= 8'h00;
-			finale_p <= 1'b0; tempo_p <= 1'b0; formatto_p <= 1'b0;
+			flag <= 0;
+			tempo_p <= 1'b0; formatto_p <= 1'b0;
 			h_oro_p <= 8'h00; m_oro_p <= 8'h00; s_oro_p <= 8'h00;
 			giorno_p <= 8'h00; messe_p <= 8'h00; agno_p <= 8'h00;
 			ora_p <= 8'h00; minute_p <= 8'h00; secondo_p <= 8'h00;   //cronometro
@@ -85,25 +97,56 @@ module Control_VGA(
 				8'h17: dir_cursor_p <= dato[2:0];
 				8'h18: direccion_prog_p <= dato;
 				8'h19: handshake <= dato;
+				8'h1a: ora_p[7:4] <= dato[3:0];
+				8'h1b: ora_p[3:0] <= dato[3:0];
+				8'h1c: minute_p[7:4] <= dato[3:0];
+				8'h1d: minute_p[3:0] <= dato[3:0];
+				8'h1e: secondo_p[7:4] <= dato[3:0];
+				8'h1f: secondo_p[3:0] <= dato[3:0];
+				8'h20: flag <= ~flag;
 			endcase
 	 end
 	 
-	 HandShake inst_handshake(
-    .clock(clock), .reset(reset), 
-    .HANDSHAKE(HANDSHAKE), 
-    .finale_P(finale_p), .tempo_P(tempo_p), .formatto_P(formatto_p), 
-    .h_oro_P(h_oro_p), .m_oro_P(m_oro_p), .s_oro_P(s_oro_p), 
-    .giorno_P(giorno_p), .messe_P(messe_p), .agno_P(agno_p), 
-    .ora_P(ora_p), .minute_P(minute_p), .secondo_P(secondo_p), 
-    .H_run_P(H_run_p), .M_run_P(M_run_p), .S_run_P(S_run_p), 
-    .direccion_prog_P(direccion_prog_p), .dir_cursor_P(dir_cursor_p), 
-    .finale(finale), .tempo(tempo), .formatto(formatto), 
-    .h_oro(h_oro), .m_oro(m_oro), .s_oro(s_oro), 
-	 .giorno(giorno), .messe(messe), .agno(agno), 
-	 .ora(ora), .minute(minute), .secondo(secondo), 
-    .H_run(H_run), .M_run(M_run), .S_run(S_run), 
-    .direccion_prog(direccion_prog), .dir_cursor(dir_cursor)
-    );
+	 always @(negedge reloj_interno)
+	 begin
+      if (reset_interno) flag_ant <= 0;
+      else flag_ant <= flag;
+	 end
+	 always @(negedge reloj_interno)
+	 begin
+      if (reset_interno) flag_sig <= 0;
+      else flag_sig <= flag_ant;
+	 end
+	 
+	 always @(posedge reloj_interno)
+	 begin
+		if (flag_sig != flag_ant) finale <= 1; 
+		else finale <= 0;
+	 end
+	 
+	 always @(posedge reloj_interno, posedge reset_interno) 
+	 begin
+		if (reset_interno)
+		begin
+			 tempo <= 1'b0; formatto <= 1'b0;
+			 h_oro <= 8'h00; m_oro <= 8'h00; s_oro <= 8'h00;
+			 giorno <= 8'h00; messe <= 8'h00; agno <= 8'h00;
+			 ora <= 8'h00; minute <= 8'h00; secondo <= 8'h00;	
+			 H_run <= 8'h00; M_run <= 8'h00; S_run <= 8'h00;	 
+			 direccion_prog <= 8'h00;
+			 dir_cursor <= 3'h0;
+		end
+		else if (handshake==8'hff)
+		begin
+			 tempo <= tempo_p; formatto <= formatto_p;
+			 h_oro <= h_oro_p; m_oro <= m_oro_p; s_oro <= s_oro_p;
+			 giorno <= giorno_p; messe <= messe_p; agno <= agno_p;
+			 ora <= ora_p; minute <= minute_p; secondo <= secondo_p;	
+			 H_run <= H_run_p; M_run <= M_run_p; S_run <= S_run_p;	 
+			 direccion_prog <= direccion_prog_p;
+			 dir_cursor <= dir_cursor_p;
+		end
+	 end
 	 
 	  Contador inst_25MHz(
     .CLK_NX(reloj_interno),
@@ -124,8 +167,16 @@ module Control_VGA(
 	 .RGB(rgb_next)
 	 );
 	 
+	 Audio inst_audio (
+    .CLK_NexYs(reloj_interno), 
+    .RST(reset_interno), 
+    .FIN_CRONOM(finale), 
+    .audio_clk(audio)
+    );
+
+	 
 	 VGA_b inst_deco_texto_fig(
-    .clk_PARPADEO(medio_seg), .CLK_NEXYS(reloj_interno), .clk_VGA(PT),
+    .clk_PARPADEO(medio_seg), .CLK_NEXYS(reloj_interno), .clk_VGA(PT), .RESET(reset_interno),
 	 .PIX_X(x_p), .PIX_Y(y_p),
 	 .HORA(h_oro), .MIN(m_oro), .SEG(s_oro), 
 	 .DIA(giorno), .MES(messe), .YEAR(agno), 

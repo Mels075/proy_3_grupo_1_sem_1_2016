@@ -1,0 +1,109 @@
+
+# PlanAhead Generated IO constraints 
+
+NET "CLK" IOSTANDARD = LVCMOS33;
+NET "hsincro" IOSTANDARD = LVCMOS33;
+NET "PS2C" IOSTANDARD = LVCMOS33;
+NET "PS2D" IOSTANDARD = LVCMOS33;
+NET "vsincro" IOSTANDARD = LVCMOS33;
+NET "sound" IOSTANDARD = LVCMOS33;
+
+# PlanAhead Generated physical constraints 
+
+NET "CLK" LOC = V10;
+
+# PlanAhead Generated IO constraints 
+
+NET "PS2C" PULLUP;
+NET "PS2D" PULLUP;
+
+# PlanAhead Generated physical constraints 
+
+NET "hsincro" LOC = N6;
+NET "vsincro" LOC = P7;
+NET "color_salida[0]" LOC = R7;
+NET "color_salida[1]" LOC = T7;
+NET "color_salida[2]" LOC = P8;
+NET "color_salida[3]" LOC = T6;
+NET "color_salida[4]" LOC = V6;
+NET "color_salida[5]" LOC = U7;
+NET "color_salida[6]" LOC = V7;
+NET "color_salida[7]" LOC = N7;
+
+# PlanAhead Generated IO constraints 
+
+NET "color_salida[7]" IOSTANDARD = LVCMOS33;
+NET "color_salida[6]" IOSTANDARD = LVCMOS33;
+NET "color_salida[5]" IOSTANDARD = LVCMOS33;
+NET "color_salida[4]" IOSTANDARD = LVCMOS33;
+NET "color_salida[3]" IOSTANDARD = LVCMOS33;
+NET "color_salida[2]" IOSTANDARD = LVCMOS33;
+NET "color_salida[1]" IOSTANDARD = LVCMOS33;
+NET "color_salida[0]" IOSTANDARD = LVCMOS33;
+
+# PlanAhead Generated physical constraints 
+
+NET "PS2C" LOC = L12;
+NET "PS2D" LOC = J13;
+
+# PlanAhead Generated IO constraints 
+
+NET "control_rtc[3]" IOSTANDARD = LVCMOS33;
+NET "control_rtc[2]" IOSTANDARD = LVCMOS33;
+NET "control_rtc[1]" IOSTANDARD = LVCMOS33;
+NET "control_rtc[0]" IOSTANDARD = LVCMOS33;
+NET "Data_in[7]" IOSTANDARD = LVCMOS33;
+NET "Data_in[6]" IOSTANDARD = LVCMOS33;
+NET "Data_in[5]" IOSTANDARD = LVCMOS33;
+NET "Data_in[4]" IOSTANDARD = LVCMOS33;
+NET "Data_in[3]" IOSTANDARD = LVCMOS33;
+NET "Data_in[2]" IOSTANDARD = LVCMOS33;
+NET "Data_in[1]" IOSTANDARD = LVCMOS33;
+NET "Data_in[0]" IOSTANDARD = LVCMOS33;
+NET "Data_out[7]" IOSTANDARD = LVCMOS33;
+NET "Data_out[6]" IOSTANDARD = LVCMOS33;
+NET "Data_out[5]" IOSTANDARD = LVCMOS33;
+NET "Data_out[4]" IOSTANDARD = LVCMOS33;
+NET "Data_out[3]" IOSTANDARD = LVCMOS33;
+NET "Data_out[2]" IOSTANDARD = LVCMOS33;
+NET "Data_out[1]" IOSTANDARD = LVCMOS33;
+NET "Data_out[0]" IOSTANDARD = LVCMOS33;
+
+# PlanAhead Generated physical constraints 
+
+NET "Data_in[7]" LOC = F2;
+NET "Data_in[6]" LOC = J6;
+NET "Data_in[5]" LOC = J7;
+NET "Data_in[4]" LOC = G1;
+NET "Data_in[3]" LOC = G3;
+NET "Data_in[2]" LOC = K6;
+NET "Data_in[1]" LOC = L7;
+NET "Data_in[0]" LOC = H3;
+
+# PlanAhead Generated IO constraints 
+
+NET "Data_out[7]" PULLUP;
+NET "Data_out[6]" PULLUP;
+NET "Data_out[5]" PULLUP;
+NET "Data_out[4]" PULLUP;
+NET "Data_out[3]" PULLUP;
+NET "Data_out[2]" PULLUP;
+NET "Data_out[1]" PULLUP;
+NET "Data_out[0]" PULLUP;
+
+# PlanAhead Generated physical constraints 
+
+NET "Data_out[7]" LOC = K5;
+NET "Data_out[6]" LOC = K3;
+NET "Data_out[5]" LOC = J1;
+NET "Data_out[4]" LOC = J3;
+NET "Data_out[3]" LOC = L3;
+NET "Data_out[2]" LOC = L4;
+NET "Data_out[1]" LOC = K1;
+NET "Data_out[0]" LOC = K2;
+NET "control_rtc[2]" LOC = V12;
+NET "control_rtc[3]" LOC = T12;
+NET "control_rtc[1]" LOC = P11;
+NET "control_rtc[0]" LOC = N10;
+
+NET "sound" LOC = G11;

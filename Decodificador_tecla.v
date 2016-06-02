@@ -69,7 +69,7 @@ module Decodificador_tecla(
 	 always @ (posedge CLK_Nexys)
 	 begin
 		if (interrupt_paro) interrupt <= 1'b0;
-		else if ((tecla_ant != tecla_sig) && tecla_correcta) interrupt <= 1'b1;
+		else if ((tecla_ant != tecla_sig) && tecla_correcta) interrupt <= 1'b1;  // Son diferentes para evitar que se manden interrupts a cada rato
 	 end
 	 
 	 assign TECLA_OUT = tecla_ant;
